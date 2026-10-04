@@ -7,13 +7,13 @@ class TicTacToeNetwork(nn.Module):
         super().__init__()
 
         self.network = nn.Sequential(
-            nn.Linear(9, 64), #9 is moves,64 is parameters for  hidden neural network nueron ----Input layer
+            nn.Linear(9, 128),
             nn.ReLU(),
 
-            nn.Linear(64, 64), #64  transforemed parametrs to 64 learned parametrs----Hidden layer
+            nn.Linear(128, 128),
             nn.ReLU(),
 
-            nn.Linear(64, 9)#64 learned parametrs to 9 best moves-----Output layer
+            nn.Linear(128, 9)
         )
 
     def forward(self, state):
