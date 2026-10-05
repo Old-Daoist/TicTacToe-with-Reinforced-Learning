@@ -177,19 +177,19 @@ The DQN uses legal-action masking, so it should normally avoid invalid actions.
 Current architecture:
 
 ```text
-9 → 64 → 64 → 9
+9 → 128 → 128 → 9
 ```
 
 Code:
 
 ```python
-nn.Linear(9, 64)
+nn.Linear(9, 128)
 nn.ReLU()
 
-nn.Linear(64, 64)
+nn.Linear(128, 128)
 nn.ReLU()
 
-nn.Linear(64, 9)
+nn.Linear(128, 9)
 ```
 
 ### Why 9?
