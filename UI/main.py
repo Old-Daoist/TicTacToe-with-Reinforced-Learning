@@ -62,6 +62,8 @@ def main():
                     else:
                         screen = pygame.display.set_mode((DEFAULT_W, DEFAULT_H), pygame.RESIZABLE)
                         rebuild(DEFAULT_W, DEFAULT_H)
+                elif state == "SETUP":
+                    setup.handle_event(ev)
 
             elif ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 pos = ev.pos
@@ -85,10 +87,6 @@ def main():
                     elif action == "start":
                         board = GameBoard(w, h, setup.mode, setup.p1_name, setup.p2_name, setup.p1_piece, history)
                         state = "GAME"
-                        
-            elif state == "SETUP":
-                # Handle text input for setup menu
-                setup.handle_event(ev)
 
         # ======== RENDER ========
         screen.blit(bg, (0, 0))
