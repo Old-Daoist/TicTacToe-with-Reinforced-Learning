@@ -77,7 +77,9 @@ def main():
                             state = "MENU"
                 elif state == "MENU":
                     action = menu.handle_click(pos)
-                    if action in ("ai", "human"):
+                    if action == "exit":
+                        running = False
+                    elif action in ("ai", "human"):
                         setup = SetupMenu(w, h, action)
                         state = "SETUP"
                 elif state == "SETUP":

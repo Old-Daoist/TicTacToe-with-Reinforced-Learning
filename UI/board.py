@@ -154,12 +154,14 @@ class GameBoard:
             self._reset()
             return None
 
-        # If game is over, check for "Play Again" button on the popup
+        # If game is over, check for buttons on the popup
         if self.game_over:
             if pygame.time.get_ticks() - self.game_over_time > 1200:
-                popup_btn = self._get_popup_btn()
-                if popup_btn and popup_btn.collidepoint(pos):
+                btn_next, btn_menu = self._get_popup_btns()
+                if btn_next.collidepoint(pos):
                     self._reset()
+                elif btn_menu.collidepoint(pos):
+                    return "back"
             return None
 
         x, y = pos
@@ -176,13 +178,16 @@ class GameBoard:
                         self._ai_move()
         return None
 
-    def _get_popup_btn(self):
-        """Returns the rect for the Play Again button on the victory popup."""
+    def _get_popup_btns(self):
+        """Returns the rects for the (Next Game, Menu) buttons on the victory popup."""
         pw, ph = 420, 340
         px = self.w // 2 - pw // 2
         py = self.h // 2 - ph // 2
-        btn_w, btn_h = 200, 50
-        return pygame.Rect(self.w // 2 - btn_w // 2, py + ph - 80, btn_w, btn_h)
+        btn_w, btn_h = 160, 50
+        bx1 = self.w // 2 - 170
+        bx2 = self.w // 2 + 10
+        y = py + ph - 80
+        return pygame.Rect(bx1, y, btn_w, btn_h), pygame.Rect(bx2, y, btn_w, btn_h)
 
     # ---- drawing ----
     def _draw_x(self, screen, cx, cy, sz):
@@ -257,10 +262,11 @@ class GameBoard:
             screen.blit(s, (self.w // 2 - s.get_width() // 2, y_off))
             y_off += 28
 
-        # Play Again button
+        # Buttons
         m = pygame.mouse.get_pos()
-        btn = self._get_popup_btn()
-        draw_button(screen, btn, "Play Again", FONT_HEADING, btn.collidepoint(m))
+        btn_next, btn_menu = self._get_popup_btns()
+        draw_button(screen, btn_next, "Next Game", FONT_HEADING, btn_next.collidepoint(m))
+        draw_button(screen, btn_menu, "Main Menu", FONT_HEADING, btn_menu.collidepoint(m))
 
     def draw(self, screen):
         m = pygame.mouse.get_pos()

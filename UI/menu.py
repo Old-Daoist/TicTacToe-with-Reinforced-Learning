@@ -13,11 +13,12 @@ class MainMenu:
     def _layout(self):
         bw, bh = 360, 65
         cx = self.w // 2
-        pw, ph = 460, 400
+        pw, ph = 460, 485
         self.panel = pygame.Rect(cx - pw // 2, self.h // 2 - ph // 2, pw, ph)
         base = self.panel.y + 170
         self.btn_ai = pygame.Rect(cx - bw // 2, base, bw, bh)
         self.btn_pvp = pygame.Rect(cx - bw // 2, base + 85, bw, bh)
+        self.btn_exit = pygame.Rect(cx - bw // 2, base + 170, bw, bh)
 
     def resize(self, w, h):
         self.w, self.h = w, h
@@ -28,6 +29,8 @@ class MainMenu:
             return "ai"
         if self.btn_pvp.collidepoint(pos):
             return "human"
+        if self.btn_exit.collidepoint(pos):
+            return "exit"
         return None
 
     def draw(self, screen):
@@ -51,6 +54,7 @@ class MainMenu:
 
         draw_button(screen, self.btn_ai, "Player  vs  AI", FONT_HEADING, self.btn_ai.collidepoint(m))
         draw_button(screen, self.btn_pvp, "Player  vs  Player", FONT_HEADING, self.btn_pvp.collidepoint(m))
+        draw_button(screen, self.btn_exit, "Exit Game", FONT_HEADING, self.btn_exit.collidepoint(m))
 
 
 class SetupMenu:
