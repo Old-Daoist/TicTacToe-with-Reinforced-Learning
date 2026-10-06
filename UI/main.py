@@ -75,6 +75,8 @@ def main():
                         action = board.handle_click(pos)
                         if action == "back":
                             state = "MENU"
+                        elif action == "exit":
+                            running = False
                 elif state == "MENU":
                     action = menu.handle_click(pos)
                     if action == "exit":
