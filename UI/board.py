@@ -168,7 +168,7 @@ class GameBoard:
                 self._check_end()
                 if not self.game_over:
                     self.current_player = 2 if self.current_player == 1 else 1
-                    if self.mode == "ai" and self.current_player == 2:
+                    if self.mode == "ai" and self.current_player == self.ai_piece:
                         self._ai_move()
         return None
 
