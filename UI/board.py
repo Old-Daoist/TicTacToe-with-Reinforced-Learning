@@ -130,16 +130,20 @@ class GameBoard:
             self.history.add_log(0, self.mode)
 
     def _reset(self):
+        next_first = 1
+        if self.winner != 0:
+            next_first = self.winner
+            
         self.board = [0] * 9
-        self.current_player = 1
+        self.current_player = next_first
         self.game_over = False
         self.game_over_time = 0
         self.winner = 0
         self.win_line = self.winning_cells = None
         self.winning_cells = []
         
-        # If AI is X, it moves first again
-        if self.mode == "ai" and self.ai_piece == 1:
+        # If AI is playing as next_first, it moves first again
+        if self.mode == "ai" and self.ai_piece == next_first:
             self._ai_move()
 
     # ---- input ----
