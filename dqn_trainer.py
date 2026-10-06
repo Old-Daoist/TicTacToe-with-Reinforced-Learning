@@ -246,7 +246,7 @@ def train():
     result_filename = f"training_result_{timestamp}.txt"
     result_filepath = os.path.join(data_dir, result_filename)
     
-    with open(result_filepath, "w") as f:
+    with open(result_filepath, "w", encoding="utf-8") as f:
         f.write("--- TIC-TAC-TOE TRAINING RESULTS ---\n\n")
         f.write("1. HYPER-PARAMETERS USED:\n")
         for key, value in config.items():
