@@ -65,6 +65,9 @@ def main():
                 elif state == "SETUP":
                     setup.handle_event(ev)
 
+            elif ev.type == pygame.MOUSEWHEEL:
+                history.handle_scroll(ev.y)
+
             elif ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 pos = ev.pos
 

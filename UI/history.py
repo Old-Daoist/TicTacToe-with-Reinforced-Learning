@@ -13,6 +13,7 @@ class HistoryDrawer:
         self.current_x = float(sw)
         self.is_open = False
         self.logs = []
+        self.scroll_y = 0
 
     def resize(self, sw, sh):
         self.sw, self.sh = sw, sh
@@ -25,6 +26,13 @@ class HistoryDrawer:
     def toggle(self):
         self.is_open = not self.is_open
         self.target_x = float(self.sw - self.width) if self.is_open else float(self.sw)
+
+    def handle_scroll(self, dy):
+        if not self.is_open:
+            return
+        self.scroll_y -= dy * 30
+        max_scroll = max(0, len(self.logs) * 46 - (self.sh - TITLEBAR_H - 90))
+        self.scroll_y = max(0, min(self.scroll_y, max_scroll))
 
     def add_log(self, winner, mode):
         n = len(self.logs) + 1
@@ -83,12 +91,23 @@ class HistoryDrawer:
                          (cx + self.width - 20, TITLEBAR_H + 60), 1)
 
         # Log entries
-        max_visible = (self.sh - TITLEBAR_H - 90) // 46
-        visible = self.logs[-max_visible:]
-        y = TITLEBAR_H + 75
-        for entry in visible:
-            card = pygame.Rect(cx + 14, y, self.width - 28, 38)
-            draw_panel(screen, card, DRAWER_CARD, FRAME_COLOR, radius=8, border_w=1, shadow=False)
-            txt = FONT_SMALL.render(entry, True, TEXT_BROWN)
-            screen.blit(txt, (cx + 26, y + 9))
+        y_start = TITLEBAR_H + 75
+        h_area = self.sh - y_start - 20
+        
+        # Max scroll update just to be safe
+        max_scroll = max(0, len(self.logs) * 46 - h_area)
+        self.scroll_y = max(0, min(self.scroll_y, max_scroll))
+        
+        clip_rect = pygame.Rect(cx, y_start, self.width, h_area)
+        screen.set_clip(clip_rect)
+        
+        y = y_start - self.scroll_y
+        for entry in self.logs:
+            if y + 46 > y_start and y < y_start + h_area:
+                card = pygame.Rect(cx + 14, y, self.width - 28, 38)
+                draw_panel(screen, card, DRAWER_CARD, FRAME_COLOR, radius=8, border_w=1, shadow=False)
+                txt = FONT_SMALL.render(entry, True, TEXT_BROWN)
+                screen.blit(txt, (cx + 26, y + 9))
             y += 46
+            
+        screen.set_clip(None)
