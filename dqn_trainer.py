@@ -26,7 +26,7 @@ def load_config():
             "EPISODES": 100000,
             "TARGET_UPDATE_FREQ": 100,
             "EPSILON_START": 1.0,
-            "EPSILON_END": 0.05,
+            "EPSILON_END": 0.0000,
             "EPSILON_DECAY": 0.9999
         }
 
