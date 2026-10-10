@@ -1,0 +1,6 @@
+# Core Reinforcement Learning & Neural Network
+torch>=2.0.0
+numpy>=1.26.0
+
+# User Interface
+pygame>=2.5.0
