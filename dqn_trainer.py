@@ -96,7 +96,7 @@ def train_step(network, target_network, optimizer, buffer, batch_size, gamma):
         target_q_values
     )
 
-    # Time to do the learning! Backpropagation updates the weights in our brain.
+    # Time to do the learning! Backpr opagation updates the weights in our brain.
     optimizer.zero_grad() # Clear old gradients
     loss.backward()       # Calculate new gradients
     optimizer.step()      # Update the weights!
@@ -145,10 +145,10 @@ def train():
     buffer = ReplayBuffer(buffer_size)
 
     # Variables to track progress
-    total_rewards_list = []
-    wins = 0
-    losses = 0
+    x_wins = 0
+    o_wins = 0
     draws = 0
+
     
     print(f"Starting training for {episodes} episodes...")
 
@@ -157,57 +157,71 @@ def train():
 
         # Start a brand new game
         state = env.reset()
-
-        total_reward = 0
+        
+        # Record moves for both players during this game: {1: [(s, a), ...], 2: [(s, a), ...]}
+        moves_by_player = {1: [], 2: []}
         loss = None
-
+        
         while True:
-            # What moves are we allowed to make right now?
+            current_player = env.game.current_player
             legal_actions = env.legal_actions()
-
-            # Choose an action! Sometimes we explore (random), sometimes we exploit (use brain)
-            # This is called epsilon-greedy!
+          
+            # The network chooses a move for whichever player's turn it is!
             action = select_action(
                 network,
                 state,
                 legal_actions,
                 epsilon
             )
-
-            # Do the action in the game and see what happens!
-            next_state, reward, done = env.step(action)
-
-            # Save what just happened into our memory bank
-            buffer.add(
-                state,
-                action,
-                reward,
-                next_state,
-                done
-            )
-
-            # Learn from our memories!
-            loss = train_step(
-                network,
-                target_network,
-                optimizer,
-                buffer,
-                batch_size,
-                gamma
-            )
-
-            # Update our current state for the next turn
+            
+            # Record this player's state and action
+            moves_by_player[current_player].append((state, action))
+            
+            # Execute the move
+            next_state, _, done = env.step(action)
             state = next_state
-            total_reward += reward
-
-            # If the game is over, break out of this loop!
             if done:
-                if reward == 1:
-                    wins += 1
-                elif reward == -1:
-                    losses += 1
+                winner = env.game.check_winner()
+                if winner == 1:
+                    x_wins += 1
+                elif winner == 2:
+                    o_wins += 1
                 else:
                     draws += 1
+                
+                # Add experiences to the buffer for BOTH players
+                for p in [1, 2]:
+                    p_moves = moves_by_player[p]
+                    if not p_moves:
+                        continue
+                    
+                    # Decide final reward for player p
+                    if winner == p:
+                        outcome_reward = 1.0
+                    elif winner == 0:
+                        outcome_reward = 0.5  # Draw
+                    else:
+                        outcome_reward = -1.0  # Loss
+                    
+                    # Intermediate moves get reward 0.0, final move gets outcome_reward
+                    for i in range(len(p_moves) - 1):
+                        s, a = p_moves[i]
+                        s_next, _ = p_moves[i + 1]
+                        buffer.add(s, a, 0.0, s_next, False)
+                    
+                    # Last move for player p
+                    s_last, a_last = p_moves[-1]
+                    buffer.add(s_last, a_last, outcome_reward, [0] * 9, True)
+                
+                # Learn from memories in replay buffer
+                loss = train_step(
+                    network,
+                    target_network,
+                    optimizer,
+                    buffer,
+                    batch_size,
+                    gamma
+                )
                 break
         
         # Every once in a while, copy the main brain over to the target brain
@@ -226,10 +240,13 @@ def train():
         if episode % 100 == 0:
             print(
                 f"Episode: {episode}, "
-                f"Reward: {total_reward}, "
+                f"X Wins: {x_wins}, "
+                f"O Wins: {o_wins}, "
+                f"Draws: {draws}, "
                 f"Epsilon: {epsilon:.3f}, "
                 f"Loss: {loss}"
             )
+
 
     # YAY! Training is all done. Time to save our work!
     # Save the trained brain (model)
