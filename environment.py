@@ -25,42 +25,35 @@ class TicTacToeEnv:
         return self.game.legal_actions()
 
     def step(self, action):
-        # AI (X) tries to make a move
+        # 1. Check if the chosen move is legal
         if action not in self.game.legal_actions():
             return self.observation(), -1, True
 
+        # 2. Remember who is taking this move before the turn switches
+        player_who_moved = self.game.current_player
+        
+        # 3. Make the move (this automatically updates the board and switches current_player)
         self.game.make_move(action)
-
-        # AI (X) won
-        if self.game.check_winner() == 1:
+        
+        # 4. Check if this move won the game
+        if self.game.check_winner() == player_who_moved:
             return self.observation(), 1, True
-
-        # AI's move resulted in a draw
+        
+        # 5. Check if it's a draw
         if self.game.is_draw():
             return self.observation(), 0.5, True
-
-        # Opponent (O) makes a random move
-        self.opponent_move()
-
-        # Opponent (O) won
-        if self.game.check_winner() == 2:
-            return self.observation(), -1, True
-
-        # Opponent's move resulted in a draw
-        if self.game.is_draw():
-            return self.observation(), 0, True
-
-        # Game continues
+        
+        # 6. Game continues -> next player's turn (reward 0, not done)
         return self.observation(), 0, False
 
-    def opponent_move(self):
-        legal_actions = self.legal_actions()
+    # def opponent_move(self):
+    #     legal_actions = self.legal_actions()
 
-        if not legal_actions:
-            return
+    #     if not legal_actions:
+    #         return
 
-        action = random.choice(legal_actions)
-        self.game.make_move(action)
+    #     action = random.choice(legal_actions)
+    #     self.game.make_move(action)
 
 
 if __name__ == "__main__":
