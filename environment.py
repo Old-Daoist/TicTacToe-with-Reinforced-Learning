@@ -11,8 +11,15 @@ class TicTacToeEnv:
         self.game.reset()
         return self.observation()
 
+    # def observation(self):
+    #     return [1 if x == 1 else -1 if x == 2 else 0 for x in self.game.board]
+
+    # we want whoever's turn it currently is (self.game.current_player) to always see themselves as +1, and the opponent as -1
     def observation(self):
-        return [1 if x == 1 else -1 if x == 2 else 0 for x in self.game.board]
+        cur = self.game.current_player
+        opp = 2 if cur == 1 else 1
+        return [1 if x == cur else -1 if x == opp else 0 for x in self.game.board]
+
 
     def legal_actions(self):
         return self.game.legal_actions()
