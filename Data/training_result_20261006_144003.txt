@@ -15,3 +15,4 @@
 2. TRAINING SUMMARY:
    Total Episodes: 100000
    Average Reward (Last 100 Episodes): 0.96
+ 94% avg

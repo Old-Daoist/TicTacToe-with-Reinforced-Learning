@@ -1,19 +1,23 @@
 --- TIC-TAC-TOE TRAINING RESULTS ---
 
 1. HYPER-PARAMETERS USED:
-   GAMMA: 0.99
+   GAMMA: 0.995
    LEARNING_RATE: 0.001
    BUFFER_SIZE: 50000
    BATCH_SIZE: 128
    EPISODES: 100000
    TARGET_UPDATE_FREQ: 100
    EPSILON_START: 1.0
-   EPSILON_END: 0.05
+   EPSILON_END: 0.0
    EPSILON_DECAY: 0.9999
    HIDDEN_NEURONS: 128
 
 2. TRAINING SUMMARY:
    Total Episodes: 100000
-   Average Reward (Last 100 Episodes): 0.94
+   Average Reward (Last 100 Episodes): 0.97
+   Win Rate: 92.13%
+   Loss Rate: 3.98%
+   Draw Rate: 3.89%
+   Overall Accuracy (Win + Draw): 96.03%
 
-   90% avg
+Look at you! You're a machine learning expert now! 😎
