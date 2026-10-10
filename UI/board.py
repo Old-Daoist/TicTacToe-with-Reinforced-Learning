@@ -212,6 +212,52 @@ class GameBoard:
         pygame.draw.circle(screen, O_DARK, (cx+2, cy+2), r, t+3)
         pygame.draw.circle(screen, O_LIGHT, (cx, cy), r, t)
 
+    def _get_popup_icon(self, is_win):
+        if not hasattr(self, "_icon_cache"):
+            self._icon_cache = {}
+        if is_win in self._icon_cache:
+            return self._icon_cache[is_win]
+
+        emoji_char = "🏆" if is_win else "🤝"
+        icon_surf = None
+
+        # Try system emoji fonts across Linux, Windows, macOS
+        for font_name in ["notocoloremoji", "segoeuiemoji", "applecoloremoji", "notoemoji", "symbola", "twemoji"]:
+            path = pygame.font.match_font(font_name)
+            if path:
+                try:
+                    f = pygame.font.Font(path, 64)
+                    surf = f.render(emoji_char, True, TEXT_BROWN)
+                    # Verify font didn't fall back to a 19px wide tofu box
+                    if surf.get_width() >= 32 and surf.get_height() >= 32:
+                        target_h = 60
+                        target_w = int(surf.get_width() * (target_h / surf.get_height()))
+                        icon_surf = pygame.transform.smoothscale(surf, (target_w, target_h))
+                        break
+                except Exception:
+                    pass
+
+        # Vector drawing fallback if no system font renders the emoji glyph
+        if icon_surf is None:
+            icon_surf = pygame.Surface((64, 60), pygame.SRCALPHA)
+            if is_win:
+                gold = (212, 175, 55)
+                dark_gold = (160, 120, 30)
+                pygame.draw.polygon(icon_surf, gold, [(16, 8), (48, 8), (42, 34), (22, 34)])
+                pygame.draw.polygon(icon_surf, dark_gold, [(16, 8), (48, 8), (42, 34), (22, 34)], 2)
+                pygame.draw.arc(icon_surf, gold, pygame.Rect(8, 12, 16, 16), 1.5, 4.5, 3)
+                pygame.draw.arc(icon_surf, gold, pygame.Rect(40, 12, 16, 16), 4.7, 1.7, 3)
+                pygame.draw.rect(icon_surf, dark_gold, pygame.Rect(30, 34, 4, 12))
+                pygame.draw.rect(icon_surf, gold, pygame.Rect(20, 46, 24, 8), border_radius=2)
+            else:
+                brown = (140, 90, 40)
+                pygame.draw.circle(icon_surf, brown, (24, 28), 10, 3)
+                pygame.draw.circle(icon_surf, brown, (40, 28), 10, 3)
+                pygame.draw.line(icon_surf, brown, (16, 44), (48, 44), 4)
+
+        self._icon_cache[is_win] = icon_surf
+        return icon_surf
+
     def _draw_victory_popup(self, screen):
         """Draws a beautiful trophy popup over the board when the game ends."""
         # Dim the background
@@ -231,20 +277,15 @@ class GameBoard:
         inner = pygame.Rect(px + 10, py + 10, pw - 20, ph - 20)
         draw_panel(screen, inner, CELL_COLOR, FRAME_COLOR, radius=18, border_w=2, shadow=False)
 
-        # Trophy / emoji text
-        try:
-            emoji_font = pygame.font.SysFont("segoeuiemoji", 64)
-        except Exception:
-            emoji_font = pygame.font.Font(None, 72)
+        # Trophy / emoji text (with cross-platform font resolution & vector fallback)
+        is_win = (self.winner in (1, 2))
+        trophy = self._get_popup_icon(is_win)
 
         if self.winner == 1:
-            trophy = emoji_font.render("🏆", True, TEXT_BROWN)
             title = f"{self.x_name} Wins!"
         elif self.winner == 2:
-            trophy = emoji_font.render("🏆", True, TEXT_BROWN)
             title = f"{self.o_name} Wins!"
         else:
-            trophy = emoji_font.render("🤝", True, TEXT_BROWN)
             title = "It's a Draw!"
 
         screen.blit(trophy, (self.w // 2 - trophy.get_width() // 2, py + 30))
