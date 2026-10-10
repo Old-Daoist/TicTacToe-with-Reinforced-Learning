@@ -234,7 +234,6 @@ def train():
             epsilon * epsilon_decay
         )
 
-        total_rewards_list.append(total_reward)
 
         # Print our progress so we can watch it learn!
         if episode % 100 == 0:
@@ -272,21 +271,15 @@ def train():
         f.write("\n2. TRAINING SUMMARY:\n")
         f.write(f"   Total Episodes: {episodes}\n")
         
-        # Calculate average reward over the last 100 games
-        recent_avg = sum(total_rewards_list[-100:]) / min(100, len(total_rewards_list))
-        f.write(f"   Average Reward (Last 100 Episodes): {recent_avg:.2f}\n")
-        
-        # Calculate win/loss/draw rates (Accuracy)
-        win_rate = (wins / episodes) * 100
-        loss_rate = (losses / episodes) * 100
+        # Calculate win and draw rates for Self-Play
+        x_win_rate = (x_wins / episodes) * 100
+        o_win_rate = (o_wins / episodes) * 100
         draw_rate = (draws / episodes) * 100
-        non_loss_rate = ((wins + draws) / episodes) * 100
         
-        f.write(f"   Win Rate: {win_rate:.2f}%\n")
-        f.write(f"   Loss Rate: {loss_rate:.2f}%\n")
+        f.write(f"   X Win Rate: {x_win_rate:.2f}%\n")
+        f.write(f"   O Win Rate: {o_win_rate:.2f}%\n")
         f.write(f"   Draw Rate: {draw_rate:.2f}%\n")
-        f.write(f"   Overall Accuracy (Win + Draw): {non_loss_rate:.2f}%\n")
-        f.write("\nLook at you! You're a machine learning expert now! 😎\n")
+
 
     print(f"Training results saved to: {result_filepath}")
 
