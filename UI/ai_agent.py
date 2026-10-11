@@ -3,8 +3,12 @@ import sys
 import random
 import glob
 
-# Ensure workspace root is in sys.path
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# Support PyInstaller standalone bundle path as well as standard directory
+if hasattr(sys, "_MEIPASS"):
+    project_root = sys._MEIPASS
+else:
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
@@ -37,10 +41,16 @@ class AIAgent:
     def _load_model(self):
         if not TORCH_AVAILABLE:
             return
-        if os.path.exists(self.model_path):
+        candidate_paths = [
+            self.model_path,
+            os.path.join(os.path.dirname(sys.executable), "tictactoe_model.pth"),
+            os.path.join(os.getcwd(), "tictactoe_model.pth")
+        ]
+        resolved_path = next((p for p in candidate_paths if os.path.exists(p)), None)
+        if resolved_path:
             try:
                 self.network = TicTacToeNetwork()
-                self.network.load_state_dict(torch.load(self.model_path, map_location="cpu", weights_only=True))
+                self.network.load_state_dict(torch.load(resolved_path, map_location="cpu", weights_only=True))
                 self.network.eval()
             except Exception:
                 self.network = None
