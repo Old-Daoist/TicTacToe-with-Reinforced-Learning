@@ -1,5 +1,14 @@
-import pygame
+import os
 import sys
+
+# Ensure PyInstaller bundle directory and UI folder are in sys.path
+current_dir = os.path.dirname(os.path.abspath(__file__))
+bundle_dir = getattr(sys, "_MEIPASS", current_dir)
+for p in (bundle_dir, current_dir, os.path.join(bundle_dir, "UI")):
+    if os.path.exists(p) and p not in sys.path:
+        sys.path.insert(0, p)
+
+import pygame
 from constants import *
 from utils import create_bg, draw_panel
 from menu import MainMenu, SetupMenu

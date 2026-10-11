@@ -24,7 +24,7 @@ jobs:
 
       - name: Build standalone Windows EXE
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name "TicTacToe" --add-data "tictactoe_model.pth;." UI/main.py
+          pyinstaller --noconfirm --onefile --windowed --paths UI --name "TicTacToe" --add-data "tictactoe_model.pth;." --add-data "UI;UI" UI/main.py
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
@@ -50,7 +50,7 @@ jobs:
 
       - name: Build standalone Linux Binary
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name "TicTacToe-Linux" --add-data "tictactoe_model.pth:." UI/main.py
+          pyinstaller --noconfirm --onefile --windowed --paths UI --name "TicTacToe-Linux" --add-data "tictactoe_model.pth:." --add-data "UI:UI" UI/main.py
           chmod +x dist/TicTacToe-Linux
 
       - name: Upload Linux Artifact
