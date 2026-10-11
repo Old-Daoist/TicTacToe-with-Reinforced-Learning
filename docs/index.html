@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Tic-Tac-Toe — Natural Edition (Pure Reinforcement Learning AI)</title>
+  <meta name="description" content="Play Tic-Tac-Toe against a 100% pure Deep Q-Network Reinforcement Learning AI in your browser. Mobile & Desktop optimized.">
+  <meta name="theme-color" content="#1e130c">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- ================= VIEW 1: MAIN MENU ================= -->
+    <main id="view-menu" class="view active">
+      <div class="wood-panel menu-card">
+        <h1 class="game-title">TIC-TAC-TOE</h1>
+        <div class="game-subtitle">Natural Wood Edition</div>
+        <div class="badge-rl">🧠 Pure Deep Q-Network AI</div>
+
+        <div class="btn-stack">
+          <button id="btn-play-ai" class="btn btn-gold">
+            <span>Play vs AI</span>
+            <span>🤖</span>
+          </button>
+          <button id="btn-play-pvp" class="btn">
+            <span>Pass & Play (2P)</span>
+            <span>👥</span>
+          </button>
+          <button id="btn-menu-history" class="btn">
+            <span>Match History</span>
+            <span>📜</span>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- ================= VIEW 2: SETUP SCREEN ================= -->
+    <section id="view-setup" class="view">
+      <div class="wood-panel setup-card">
+        <h2 id="setup-title" class="card-title">Game Setup</h2>
+
+        <div class="input-group">
+          <label for="input-p1" class="input-label">Player 1 Name:</label>
+          <input type="text" id="input-p1" class="input-field" value="Player 1" maxlength="15" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div class="input-group">
+          <label id="label-p2" for="input-p2" class="input-label">Player 2 Name:</label>
+          <input type="text" id="input-p2" class="input-field" value="Player 2" maxlength="15" autocomplete="off" spellcheck="false">
+        </div>
+
+        <div class="input-group">
+          <span class="input-label">Player 1 Piece:</span>
+          <div class="piece-selector">
+            <button id="btn-piece-x" class="piece-btn selected" type="button">
+              <span style="font-size: 1.4rem; color: #e87b64;">✕</span>
+              <span>Play X (1st)</span>
+            </button>
+            <button id="btn-piece-o" class="piece-btn" type="button">
+              <span style="font-size: 1.4rem; color: #5eb0f0;">○</span>
+              <span>Play O (2nd)</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="btn-stack" style="margin-top: 8px;">
+          <button id="btn-start-game" class="btn btn-gold">
+            <span>Start Match</span>
+            <span>⚔️</span>
+          </button>
+          <button id="btn-setup-back" class="btn btn-small">
+            <span>Back to Menu</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 3: GAME BOARD SCREEN ================= -->
+    <section id="view-game" class="view">
+      <div class="game-header">
+        <div class="top-bar">
+          <div class="nav-btns">
+            <button id="btn-back-menu" class="btn btn-small" title="Main Menu">Menu</button>
+            <button id="btn-restart" class="btn btn-small" title="Restart Match">Restart</button>
+          </div>
+          <div class="util-btns">
+            <button id="btn-mute" class="btn icon-btn" title="Toggle Sound">🔊</button>
+            <button id="btn-open-history" class="btn icon-btn" title="Match History">📜</button>
+          </div>
+        </div>
+
+        <div class="scores-pill">
+          <div class="score-item">
+            <span id="name-x">Player 1</span> (X):
+            <span id="score-x" class="score-badge">0</span>
+          </div>
+          <div class="score-item">
+            <span id="name-o">AI</span> (O):
+            <span id="score-o" class="score-badge">0</span>
+          </div>
+          <div class="score-item">
+            Draws:
+            <span id="score-d" class="score-badge">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="status-banner" class="status-banner">Player 1's Turn (X)</div>
+
+      <div class="board-container">
+        <div id="board-grid" class="board-grid"></div>
+        <svg id="win-svg" class="win-svg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+      </div>
+    </section>
+
+    <!-- ================= VICTORY / DRAW MODAL ================= -->
+    <div id="victory-scrim" class="scrim" role="dialog" aria-modal="true">
+      <div id="victory-card" class="wood-panel victory-card">
+        <div id="victory-icon" class="trophy-icon">🏆</div>
+        <h2 id="victory-title" class="game-title" style="font-size: 1.8rem;">Victory!</h2>
+        <div id="victory-score-summary" style="color: var(--text-muted); font-size: 0.95rem;"></div>
+
+        <div class="btn-stack" style="width: 100%; margin-top: 8px;">
+          <button id="btn-next-game" class="btn btn-gold">Next Game</button>
+          <button id="btn-victory-menu" class="btn">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= MATCH HISTORY DRAWER ================= -->
+    <div id="history-scrim" class="scrim" role="dialog" aria-modal="true"></div>
+    <aside id="history-drawer" class="drawer">
+      <div class="drawer-header">
+        <div class="drawer-title">Match History</div>
+        <button id="btn-close-history" class="btn icon-btn" title="Close History">✕</button>
+      </div>
+      <div id="history-list" class="drawer-list"></div>
+      <button id="btn-clear-history" class="btn btn-small" style="margin-top: auto;">Clear History</button>
+    </aside>
+
+  </div>
+
+  <!-- Pure RL Model Weights, Neural Network Forward Pass, and Controller -->
+  <script src="weights.js"></script>
+  <script src="game_state.js"></script>
+  <script src="ai_agent.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
