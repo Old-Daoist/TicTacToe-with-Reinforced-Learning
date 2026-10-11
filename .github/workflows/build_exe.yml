@@ -1,0 +1,33 @@
+name: Build Windows Executable
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pygame torch pyinstaller
+
+      - name: Build standalone EXE with PyInstaller
+        run: |
+          pyinstaller --noconfirm --onefile --windowed --name "TicTacToe" --add-data "tictactoe_model.pth;." --add-data "config.json;." UI/main.py
+
+      - name: Upload TicTacToe.exe Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TicTacToe-Windows-EXE
+          path: dist/TicTacToe.exe
