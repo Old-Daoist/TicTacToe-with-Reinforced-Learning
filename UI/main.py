@@ -47,7 +47,11 @@ def main():
 
             elif ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_ESCAPE:
-                    if is_fs:
+                    if state == "GAME" and history.is_open:
+                        history.close()
+                    elif state == "SETUP":
+                        state = "MENU"
+                    elif is_fs:
                         is_fs = False
                         screen = pygame.display.set_mode((DEFAULT_W, DEFAULT_H), pygame.RESIZABLE)
                         rebuild(DEFAULT_W, DEFAULT_H)
@@ -63,10 +67,23 @@ def main():
                         screen = pygame.display.set_mode((DEFAULT_W, DEFAULT_H), pygame.RESIZABLE)
                         rebuild(DEFAULT_W, DEFAULT_H)
                 elif state == "SETUP":
-                    setup.handle_event(ev)
+                    action = setup.handle_event(ev)
+                    if action == "back":
+                        state = "MENU"
+                    elif action == "start":
+                        board = GameBoard(w, h, setup.mode, setup.p1_name, setup.p2_name, setup.p1_piece, history)
+                        state = "GAME"
 
             elif ev.type == pygame.MOUSEWHEEL:
                 history.handle_scroll(ev.y)
+
+            elif ev.type == pygame.MOUSEBUTTONUP and ev.button == 1:
+                if state == "SETUP" and setup:
+                    setup.handle_event(ev)
+
+            elif ev.type == pygame.MOUSEMOTION:
+                if state == "SETUP" and setup:
+                    setup.handle_event(ev)
 
             elif ev.type == pygame.MOUSEBUTTONDOWN and ev.button == 1:
                 pos = ev.pos
@@ -77,6 +94,7 @@ def main():
                     else:
                         action = board.handle_click(pos)
                         if action == "back":
+                            history.close()
                             state = "MENU"
                         elif action == "exit":
                             running = False
