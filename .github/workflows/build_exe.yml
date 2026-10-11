@@ -24,7 +24,7 @@ jobs:
 
       - name: Build standalone EXE with PyInstaller
         run: |
-          pyinstaller --noconfirm --onefile --windowed --name "TicTacToe" --add-data "tictactoe_model.pth;." --add-data "config.json;." UI/main.py
+          pyinstaller --noconfirm --onefile --windowed --name "TicTacToe" --add-data "tictactoe_model.pth;." UI/main.py
 
       - name: Upload TicTacToe.exe Artifact
         uses: actions/upload-artifact@v4

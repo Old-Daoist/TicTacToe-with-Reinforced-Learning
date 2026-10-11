@@ -17,17 +17,18 @@ def load_config():
         with open(config_path, "r") as f:
             return json.load(f)
     else:
-        # Fallback default values if the file somehow goes missing
+        # Locked default hyperparameters
         return {
             "GAMMA": 0.99,
-            "LEARNING_RATE": 0.001,
-            "BUFFER_SIZE": 50000,
+            "LEARNING_RATE": 0.0005,
+            "BUFFER_SIZE": 100000,
             "BATCH_SIZE": 128,
-            "EPISODES": 100000,
-            "TARGET_UPDATE_FREQ": 100,
+            "EPISODES": 200000,
+            "TARGET_UPDATE_FREQ": 500,
             "EPSILON_START": 1.0,
-            "EPSILON_END": 0.0000,
-            "EPSILON_DECAY": 0.9999
+            "EPSILON_END": 0.05,
+            "EPSILON_DECAY": 0.99995,
+            "HIDDEN_NEURONS": 256
         }
 
 def train_step(network, target_network, optimizer, buffer, batch_size, gamma):

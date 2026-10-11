@@ -7,14 +7,8 @@ class TicTacToeNetwork(nn.Module):
     def __init__(self):
         super().__init__()
 
-        # Let's load the configuration from the config.json file!
-        # This is super cool because we can change the size of the brain without changing this file.
-        hidden_neurons = 64 # Default just in case
-        config_path = os.path.join(os.path.dirname(__file__), "config.json")
-        if os.path.exists(config_path):
-            with open(config_path, "r") as f:
-                config = json.load(f)
-                hidden_neurons = config.get("HIDDEN_NEURONS", 64)
+        # Trained model architecture: 256 hidden neurons
+        hidden_neurons = 256
 
         # Here we build our Neural Network. It's like a brain for the game!
         # It takes 9 inputs (for the 9 squares of the board)

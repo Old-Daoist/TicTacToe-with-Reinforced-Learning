@@ -17,3 +17,6 @@ env/
 # OS artifacts
 .DS_Store
 Thumbs.db
+
+# Hidden / Locked config
+config.json
