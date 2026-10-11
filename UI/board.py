@@ -1,19 +1,12 @@
 import pygame
-from constants import (
-    TITLEBAR_H, FRAME_COLOR, FRAME_EDGE, CELL_COLOR, CELL_HOVER, CELL_WIN,
-    TEXT_BROWN, TEXT_CREAM, GOLD, GOLD_LIGHT, FONT_HEADING, FONT_BODY,
-    get_board_layout
-)
-from utils import draw_panel, draw_button
-from pieces import draw_x, draw_o
+from constants import TITLEBAR_H, get_board_layout
 from popup import VictoryPopup
 from ai_agent import AIAgent
+from board_view import BoardView
 
 
 class GameBoard:
-    """The main game screen:
-       Toolbar -> Status pill -> Centered board -> Score footer
-       History drawer overlays from the right."""
+    """Game controller coordinating board state, player input, AI, and views."""
 
     def __init__(self, w, h, mode, p1_name, p2_name, p1_piece, history):
         self.w, self.h = w, h
@@ -25,12 +18,10 @@ class GameBoard:
 
         # Determine roles based on P1's piece selection
         if p1_piece == "X":
-            self.x_name = self.p1_name
-            self.o_name = self.p2_name
+            self.x_name, self.o_name = self.p1_name, self.p2_name
             self.ai_piece = 2
         else:
-            self.x_name = self.p2_name
-            self.o_name = self.p1_name
+            self.x_name, self.o_name = self.p2_name, self.p1_name
             self.ai_piece = 1
 
         self.board = [0] * 9
@@ -55,8 +46,7 @@ class GameBoard:
     def _layout(self):
         self.bs, self.cs, self.bx, self.by = get_board_layout(self.w, self.h)
         pad = 16
-        self.frame = pygame.Rect(self.bx - pad, self.by - pad,
-                                 self.bs + pad * 2, self.bs + pad * 2)
+        self.frame = pygame.Rect(self.bx - pad, self.by - pad, self.bs + pad * 2, self.bs + pad * 2)
         ty = TITLEBAR_H + 8
         self.btn_menu = pygame.Rect(20, ty, 110, 36)
         self.btn_restart = pygame.Rect(140, ty, 110, 36)
@@ -71,9 +61,8 @@ class GameBoard:
         for a, b, c in combos:
             if self.board[a] and self.board[a] == self.board[b] == self.board[c]:
                 def ctr(i):
-                    r, cl = i // 3, i % 3
-                    return (self.bx + cl * self.cs + self.cs // 2,
-                            self.by + r * self.cs + self.cs // 2)
+                    return (self.bx + (i % 3) * self.cs + self.cs // 2,
+                            self.by + (i // 3) * self.cs + self.cs // 2)
                 return self.board[a], (ctr(a), ctr(c)), [a, b, c]
         return 0, None, []
 
@@ -135,9 +124,7 @@ class GameBoard:
         # Board cell click
         x, y = pos
         if (self.bx <= x < self.bx + self.bs and self.by <= y < self.by + self.bs):
-            col = int((x - self.bx) // self.cs)
-            row = int((y - self.by) // self.cs)
-            idx = row * 3 + col
+            idx = int((y - self.by) // self.cs) * 3 + int((x - self.bx) // self.cs)
             if 0 <= idx < 9 and self.board[idx] == 0:
                 self.board[idx] = self.current_player
                 self._check_end()
@@ -150,86 +137,17 @@ class GameBoard:
     def draw(self, screen):
         m = pygame.mouse.get_pos()
 
-        # Toolbar
-        draw_button(screen, self.btn_menu, "Menu", FONT_BODY, self.btn_menu.collidepoint(m))
-        draw_button(screen, self.btn_restart, "Restart", FONT_BODY, self.btn_restart.collidepoint(m))
+        # View rendering delegated to BoardView
+        BoardView.draw_toolbar(screen, self.btn_menu, self.btn_restart, m)
+        BoardView.draw_score_pill(screen, self.w, self.x_name, self.o_name, self.scores)
+        BoardView.draw_status_pill(screen, self.w, self.frame.y, self.game_over, self.winner,
+                                   self.current_player, self.x_name, self.o_name, self.mode, self.ai_piece)
+        BoardView.draw_grid_and_pieces(screen, self.board, self.frame, self.bx, self.by, self.bs, self.cs,
+                                       self.winning_cells, self.game_over, m)
+        BoardView.draw_win_line(screen, self.win_line)
 
-        # Score pill
-        stxt = f"{self.x_name} (X): {self.scores['X']}    {self.o_name} (O): {self.scores['O']}    Draws: {self.scores['D']}"
-        ss = FONT_BODY.render(stxt, True, TEXT_BROWN)
-        pill_w = ss.get_width() + 40
-        sr = pygame.Rect(self.w - pill_w - 20, TITLEBAR_H + 8, pill_w, 36)
-        draw_panel(screen, sr, CELL_COLOR, FRAME_COLOR, radius=10, border_w=2, shadow=False)
-        screen.blit(ss, (sr.centerx - ss.get_width() // 2, sr.centery - ss.get_height() // 2))
-
-        # Turn status pill
-        if not self.game_over:
-            if self.current_player == 1:
-                status = f"{self.x_name}'s Turn (X)"
-            else:
-                status = "AI Thinking..." if (self.mode == "ai" and self.ai_piece == 2) else f"{self.o_name}'s Turn (O)"
-        else:
-            if self.winner == 1:
-                status = f"{self.x_name} Wins!"
-            elif self.winner == 2:
-                status = f"{self.o_name} Wins!"
-            else:
-                status = "It's a Draw!"
-
-        st_surf = FONT_HEADING.render(status, True, TEXT_CREAM)
-        status_pill_w = st_surf.get_width() + 50
-        status_pill = pygame.Rect(self.w // 2 - status_pill_w // 2, self.frame.y - 50, status_pill_w, 40)
-        draw_panel(screen, status_pill, FRAME_COLOR, FRAME_EDGE, radius=20, border_w=2)
-        screen.blit(st_surf, (status_pill.centerx - st_surf.get_width() // 2,
-                              status_pill.centery - st_surf.get_height() // 2))
-
-        # Board frame
-        draw_panel(screen, self.frame, FRAME_COLOR, FRAME_EDGE, radius=14, border_w=4)
-
-        # Cells & wood grain
-        gap = 6
-        for i in range(9):
-            r, c = i // 3, i % 3
-            rx = self.bx + c * self.cs + gap // 2
-            ry = self.by + r * self.cs + gap // 2
-            rw = self.cs - gap
-            cell = pygame.Rect(rx, ry, rw, rw)
-
-            if i in self.winning_cells:
-                fill = CELL_WIN
-            elif self.board[i] == 0 and not self.game_over and cell.collidepoint(m):
-                fill = CELL_HOVER
-            else:
-                fill = CELL_COLOR
-
-            draw_panel(screen, cell, fill, FRAME_COLOR, radius=10, border_w=2, shadow=False)
-
-            # Wood grain accent lines
-            for gy in range(ry + 12, ry + rw - 8, 14):
-                pygame.draw.line(screen, (fill[0] - 8, fill[1] - 8, fill[2] - 6),
-                                 (rx + 8, gy), (rx + rw - 8, gy), 1)
-
-        # Pieces
-        piece_sz = int(self.cs * 0.24)
-        for i in range(9):
-            if self.board[i]:
-                r, c = i // 3, i % 3
-                cx = self.bx + c * self.cs + self.cs // 2
-                cy = self.by + r * self.cs + self.cs // 2
-                if self.board[i] == 1:
-                    draw_x(screen, cx, cy, piece_sz)
-                else:
-                    draw_o(screen, cx, cy, piece_sz)
-
-        # Winning strike line
-        if self.win_line:
-            p1, p2 = self.win_line
-            pygame.draw.line(screen, GOLD, p1, p2, 8)
-            pygame.draw.line(screen, GOLD_LIGHT, p1, p2, 3)
-
-        # Victory popup modal
+        # Overlays
         if self.game_over and pygame.time.get_ticks() - self.game_over_time > 1200:
             self.popup.draw(screen, self.winner, self.x_name, self.o_name, self.scores)
 
-        # History drawer overlay on top
         self.history.draw(screen)
