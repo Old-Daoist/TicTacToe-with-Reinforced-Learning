@@ -18,5 +18,10 @@ env/
 .DS_Store
 Thumbs.db
 
+# Build & Distribution
+build/
+dist/
+*.spec
+
 # Hidden / Locked config
 config.json
