@@ -18,10 +18,17 @@ env/
 .DS_Store
 Thumbs.db
 
-# Build & Distribution
+# Build, PyInstaller & Executable Artifacts
 build/
 dist/
 *.spec
+*.exe
+*.bin
+*.app
+*.pkg
+*.manifest
+*.zip
+*.tar.gz
 
 # Hidden / Locked config
 config.json
