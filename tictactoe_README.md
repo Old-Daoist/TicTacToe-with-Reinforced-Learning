@@ -361,12 +361,13 @@ Loss = (0.8 - 0.63)²
 
 ## 11. Backpropagation and optimizer
 
-The trainer uses SGD:
+The trainer uses SGD with Momentum:
 
 ```python
 optimizer = optim.SGD(
     network.parameters(),
-    lr=LEARNING_RATE
+    lr=LEARNING_RATE,
+    momentum=0.9
 )
 ```
 
