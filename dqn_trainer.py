@@ -28,7 +28,8 @@ def load_config():
             "EPSILON_START": 1.0,
             "EPSILON_END": 0.05,
             "EPSILON_DECAY": 0.99995,
-            "HIDDEN_NEURONS": 256
+            "HIDDEN_NEURONS": 256,
+            "OPTIMIZER": "SGD"
         }
 
 def train_step(network, target_network, optimizer, buffer, batch_size, gamma):
@@ -137,10 +138,17 @@ def train():
     target_network.eval() # We only evaluate the target network, we don't train it directly
 
     # 3. Create the Optimizer (The teacher that tells the network how to change its weights)
-    optimizer = optim.Adam(
-        network.parameters(),
-        lr=learning_rate
-    )
+    optimizer_type = config.get("OPTIMIZER", "SGD").upper()
+    if optimizer_type == "ADAM":
+        optimizer = optim.Adam(
+            network.parameters(),
+            lr=learning_rate
+        )
+    else:
+        optimizer = optim.SGD(
+            network.parameters(),
+            lr=learning_rate
+        )
 
     # 4. Create the Replay Buffer (The memory bank)
     buffer = ReplayBuffer(buffer_size)

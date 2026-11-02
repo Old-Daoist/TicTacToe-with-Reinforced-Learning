@@ -361,10 +361,10 @@ Loss = (0.8 - 0.63)²
 
 ## 11. Backpropagation and optimizer
 
-The trainer uses Adam:
+The trainer uses SGD:
 
 ```python
-optimizer = optim.Adam(
+optimizer = optim.SGD(
     network.parameters(),
     lr=LEARNING_RATE
 )
